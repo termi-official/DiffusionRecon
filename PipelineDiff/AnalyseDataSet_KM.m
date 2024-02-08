@@ -67,11 +67,11 @@ function [Dcm enum]= AnalyseDataSet_KM(varargin)
     for cpt=1:1:length(listing)
         
         
-        [FolderName, name, fExt] = fileparts([listing(cpt).folder '\' listing(cpt).name]);
+        [FolderName, name, fExt] = fileparts([fullfile(listing(cpt).folder, listing(cpt).name)]);
         
         if (strcmp(fExt, '.dcm') | strcmp(fExt, '.IMA') | isempty(fExt)) & ~listing(cpt).isdir % if listing(cpt).name(end-2:end) == 'dcm' | listing(cpt).name(end-2:end) == 'IMA'
             
-                tmpInfoDcm=dicominfo([FolderName '\' listing(cpt).name]);
+                tmpInfoDcm=dicominfo([fullfile(FolderName, listing(cpt).name)]);
             
                %if (isfield(tmpInfoDcm, 'Directionality'))  % check if the file is a valid diffusion file
                
@@ -255,18 +255,18 @@ function [Dcm enum]= AnalyseDataSet_KM(varargin)
      h = waitbar(0,'Create Volumes...'); 
      
      %%% Memory pre-alloc
-     Dcm=zeros(size(double(dicomread([infoDcm(1).foldername '/' infoDcm(1).filename])),1),size(double(dicomread([infoDcm(1).foldername  '/' infoDcm(1).filename])),2), max(enum.datasize(dataset_num).slc,enum.NFrames), enum.datasize(dataset_num).b, enum.datasize(dataset_num).dir, enum.datasize(dataset_num).avg);
+     Dcm=zeros(size(double(dicomread([fullfile(infoDcm(1).foldername, infoDcm(1).filename)])),1),size(double(dicomread([fullfile(infoDcm(1).foldername, infoDcm(1).filename)])),2), max(enum.datasize(dataset_num).slc,enum.NFrames), enum.datasize(dataset_num).b, enum.datasize(dataset_num).dir, enum.datasize(dataset_num).avg);
 
     for cpt_slc=1:1:enum.datasize(dataset_num).slc
        for cpt_b=1:1:enum.datasize(dataset_num).b     
           for cpt_dir=1:1: enum.dataset(dataset_num).slc(cpt_slc).b(cpt_b).nb_dir           
              for cpt_avg=1:1: enum.dataset(dataset_num).slc(cpt_slc).b(cpt_b).dir(cpt_dir).nb_avg
                  
-                  tmp_dcm=double(dicomread([enum.dataset(dataset_num).slc(cpt_slc).b(cpt_b).dir(cpt_dir).avg(cpt_avg).foldername '/' enum.dataset(dataset_num).slc(cpt_slc).b(cpt_b).dir(cpt_dir).avg(cpt_avg).filename]));
+                  tmp_dcm=double(dicomread([fullfile(enum.dataset(dataset_num).slc(cpt_slc).b(cpt_b).dir(cpt_dir).avg(cpt_avg).foldername, enum.dataset(dataset_num).slc(cpt_slc).b(cpt_b).dir(cpt_dir).avg(cpt_avg).filename)]));
                   if (enum.NFrames>1)
                      tmp_dcm=squeeze(tmp_dcm(:,:,:,cpt_slc));
                   end
-                  if size(tmp_dcm,1)==size(Dcm,1)                     
+                  if size(tmp_dcm,1)==size(Dcm,1)
                     Dcm(:,:,cpt_slc,cpt_b,cpt_dir,cpt_avg)=tmp_dcm;
                   else
                     Dcm(:,:,cpt_slc,cpt_b,cpt_dir,cpt_avg)=tmp_dcm'; 
